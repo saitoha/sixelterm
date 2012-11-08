@@ -32,13 +32,13 @@ Usage
 
 Dependency
 ----------
- - Hayaki Saito's PySixel
+ - PySixel
    https://github.com/saitoha/PySixel
 
  - PySixel depends on Python Imaging Library (PIL)
    http://www.pythonware.com/products/pil/ 
 
- - PySixel also depends on Hayaki Saito's TFF, Terminal Filter Framework
+ - TFF - Terminal Filter Framework
    https://github.com/saitoha/tff
 
 

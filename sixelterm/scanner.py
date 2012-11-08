@@ -34,60 +34,73 @@ _MODE_NORMAL = 0
 _MODE_PNG    = 1
 _MODE_JPEG   = 2
 
+_JPEG_SOI = '\xff\xd8'
+_JPEG_EOI = '\xff\xd9'
+
+_PNG_IEND = ''
 class ImageAwareScanner(tff.Scanner):
     ''' scan input stream and iterate characters '''
 
     def __init__(self):
         self.__imagebuffer = StringIO()
         self.__mode = _MODE_NORMAL
+        self.__writer = sixel.SixelWriter()
 
     def __writeimage(self, value):
-        '''
-        It seems that Some platform is not possible to disable termios's c_oflag ONLCR. 
-        So we replace them with string.replace  
-        '''
-        self.__imagebuffer.write(value.replace('\x0d\x0a', '\x0a'))
+        self.__imagebuffer.write(value)
+
+    def __convert(self):
+        try:
+            data = self.__imagebuffer.getvalue()
+            self.__writer.draw(StringIO(data))
+        except:
+            self.__data += 'cannot identify image file\n'
+        self.__imagebuffer = StringIO()
 
     def assign(self, value, termenc):
+        self.__termenc = termenc
         if self.__mode == _MODE_PNG:
             pos = value.find('IEND\xaeB`\x82')
             if pos != -1:
                 pos += len('IEND\xaeB`\x82')
                 self.__mode = _MODE_NORMAL 
-                self.__data = unicode(value[pos:], termenc, 'ignore')
+                self.__data = value[pos:]
                 self.__writeimage(value[:pos])
-                sixel.SixelWriter().draw(StringIO(self.__imagebuffer.getvalue()))
-                self.__imagebuffer = StringIO()
+                self.__convert()
             else:
                 self.__writeimage(value)
         elif self.__mode == _MODE_JPEG:
-            pos = value.find('\xff\xd9')
+            pos = value.find(_JPEG_EOI)
             if pos != -1:
-                pos += len('\xff\xd9')
-                self.__mode = _MODE_NORMAL 
-                self.__data = unicode(value[pos:], termenc, 'ignore')
-                self.__writeimage(value[:pos])
-                sixel.SixelWriter().draw(StringIO(self.__imagebuffer.getvalue()))
-                self.__imagebuffer = StringIO()
+                pos += len(_JPEG_EOI)
+                if pos != len(value) and (value[pos] == '\x00' or value[pos] == '\xff'):
+                    self.__writeimage(value)
+                else:
+                    self.__mode = _MODE_NORMAL 
+                    self.__data = value[pos:]
+                    self.__writeimage(value[:pos])
+                    self.__convert()
             else:
                 self.__writeimage(value)
         else:
             pos = value.find('\x89PNG')
             if pos != -1:
                 self.__mode = _MODE_PNG 
-                self.__data = unicode(value[:pos], termenc, 'ignore')
+                self.__cr = False
+                self.__data = value[:pos]
                 self.__writeimage(value[pos:])
                 return
-            pos = value.find('\xff\xd8\xff')
+            pos = value.find(_JPEG_SOI)
             if pos != -1:
                 self.__mode = _MODE_JPEG 
-                self.__data = unicode(value[:pos], termenc, 'ignore')
+                self.__cr = False
+                self.__data = value[:pos]
                 self.__writeimage(value[pos:])
                 return
-            self.__data = unicode(value, termenc, 'ignore')
+            self.__data = value
 
     def __iter__(self):
         if self.__mode == _MODE_NORMAL:
-            for x in self.__data:
+            for x in unicode(self.__data, self.__termenc, 'ignore'):
                 yield ord(x)
 

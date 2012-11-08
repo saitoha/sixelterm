@@ -24,7 +24,7 @@ setup(name                  = 'sixelterm',
       packages              = find_packages(exclude=[]),
       zip_safe              = True,
       include_package_data  = False,
-      install_requires      = ['PySixel ==0.0.2'],
+      install_requires      = ['PySixel ==0.0.3', 'tff ==0.0.4'],
       entry_points          = """
                               [console_scripts]
                               sixelterm = sixelterm:main
