@@ -5,7 +5,7 @@ from sixelterm import __version__, __license__, __author__
 
 setup(name                  = 'sixelterm',
       version               = __version__,
-      description           = 'Display JPEG/PNG image with cat command, on some terminal support SIXEL (RLogin/mlterm/tanasinn). Inspired by GateOne.',
+      description           = 'Display JPEG/PNG image with cat command, on some terminals support SIXEL (RLogin/mlterm/tanasinn). Inspired by GateOne.',
       long_description      = open("README.rst").read(),
       py_modules            = ['sixelterm'],
       eager_resources       = [],
@@ -24,7 +24,7 @@ setup(name                  = 'sixelterm',
       packages              = find_packages(exclude=[]),
       zip_safe              = True,
       include_package_data  = False,
-      install_requires      = ['PySixel ==0.0.3', 'tff ==0.0.4'],
+      install_requires      = ['PySixel ==0.0.5', 'tff ==0.0.5'],
       entry_points          = """
                               [console_scripts]
                               sixelterm = sixelterm:main
