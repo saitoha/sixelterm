@@ -80,16 +80,23 @@ along with this program. If not, see http://www.gnu.org/licenses/.
 
     import scanner
     import tff
-    settings = tff.Settings(command=command,
-                            term=term,
-                            lang=lang,
-                            stdin=sys.stdin,
-                            stdout=sys.stdout,
-                            termenc=termenc,
-                            outputscanner=scanner.ImageAwareScanner())
-    session = tff.Session()
-    session.start(settings)
 
+    # create pty
+    tty = tff.DefaultPTY(term, lang, command, sys.stdin)
+
+    # fit to screen and get size
+    tty.fitsize()
+
+
+    # create TFF session
+    session = tff.Session(tty)
+
+    # start session
+    session.start(termenc=termenc,
+                  stdin=sys.stdin,
+                  stdout=sys.stdout,
+                  outputscanner=scanner.ImageAwareScanner())
+ 
 ''' main '''
 if __name__ == '__main__':    
     main()
