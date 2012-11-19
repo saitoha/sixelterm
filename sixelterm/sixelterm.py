@@ -78,8 +78,10 @@ along with this program. If not, see http://www.gnu.org/licenses/.
     language, encoding = locale.getdefaultlocale()
     termenc = encoding
 
+    import termios
     import scanner
     import tff
+
 
     # create pty
     tty = tff.DefaultPTY(term, lang, command, sys.stdin)
@@ -87,15 +89,24 @@ along with this program. If not, see http://www.gnu.org/licenses/.
     # fit to screen and get size
     tty.fitsize()
 
+    t = termios.tcgetattr(tty.fileno())
+    backup = termios.tcgetattr(tty.fileno())
+    # c_oflag
+    t[1] &= ~termios.ONLCR 
 
-    # create TFF session
-    session = tff.Session(tty)
+    try: 
+        termios.tcsetattr(tty.fileno(), termios.TCSANOW, t)
 
-    # start session
-    session.start(termenc=termenc,
-                  stdin=sys.stdin,
-                  stdout=sys.stdout,
-                  outputscanner=scanner.ImageAwareScanner())
+        # create TFF session
+        session = tff.Session(tty)
+
+        # start session
+        session.start(termenc=termenc,
+                      stdin=sys.stdin,
+                      stdout=sys.stdout,
+                      outputscanner=scanner.ImageAwareScanner())
+    finally:
+        termios.tcsetattr(0, termios.TCSANOW, backup)
  
 ''' main '''
 if __name__ == '__main__':    
