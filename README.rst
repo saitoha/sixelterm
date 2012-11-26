@@ -57,6 +57,3 @@ Reference
 
  - vt100.net http://vt100.net/
 
-   DECDLD
-   http://vt100.net/docs/vt510-rm/DECDLD
-
