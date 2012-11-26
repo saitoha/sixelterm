@@ -82,31 +82,31 @@ along with this program. If not, see http://www.gnu.org/licenses/.
     import scanner
     import tff
 
+    t = termios.tcgetattr(0)
+    backup = termios.tcgetattr(0)
 
+    # c_oflag
+    t[1] &= ~termios.ONLCR 
+    termios.tcsetattr(0, termios.TCSANOW, t)
     # create pty
     tty = tff.DefaultPTY(term, lang, command, sys.stdin)
+
+    t = termios.tcgetattr(0)
+    t[1] |= termios.ONLCR 
+    termios.tcsetattr(0, termios.TCSANOW, t)
 
     # fit to screen and get size
     tty.fitsize()
 
-    t = termios.tcgetattr(tty.fileno())
-    backup = termios.tcgetattr(tty.fileno())
-    # c_oflag
-    t[1] &= ~termios.ONLCR 
+    # create TFF session
+    session = tff.Session(tty)
 
-    try: 
-        termios.tcsetattr(tty.fileno(), termios.TCSANOW, t)
 
-        # create TFF session
-        session = tff.Session(tty)
-
-        # start session
-        session.start(termenc=termenc,
-                      stdin=sys.stdin,
-                      stdout=sys.stdout,
-                      outputscanner=scanner.ImageAwareScanner())
-    finally:
-        termios.tcsetattr(0, termios.TCSANOW, backup)
+    # start session
+    session.start(termenc=termenc,
+                  stdin=sys.stdin,
+                  stdout=sys.stdout,
+                  outputscanner=scanner.ImageAwareScanner())
  
 ''' main '''
 if __name__ == '__main__':    
