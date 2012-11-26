@@ -21,7 +21,7 @@
 import tff
 import sixel
 try:
-    from CStringIO import StringIO
+    from cStringIO import StringIO
 except:
     from StringIO import StringIO
 
